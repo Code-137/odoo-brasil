@@ -7,6 +7,7 @@ def post_init(cr, registry):
     noupdate anymore with csv"""
     from odoo.tools import convert_file
 
-    filename = 'data/account.ncm.csv'
-    convert_file(cr, 'l10n_br_account', filename, None,
-                 mode='init', noupdate=False, kind='init', report=None)
+    filename = "data/account.ncm.csv"
+    convert_file(
+        cr, "l10n_br_account", filename, None, mode="init", noupdate=False, kind="init"
+    )

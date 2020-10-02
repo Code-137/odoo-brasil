@@ -16,9 +16,7 @@ class AccountMoveLine(models.Model):
         currency_field="company_currency_id",
     )
 
-    @api.depends(
-        "debit", "credit", "account_id.internal_type", "amount_residual"
-    )
+    @api.depends("debit", "credit", "account_id.internal_type", "amount_residual")
     def _compute_payment_value(self):
         for item in self:
             item.l10n_br_payment_value = (
@@ -35,16 +33,16 @@ class AccountMoveLine(models.Model):
         return tax_ids | self.move_id.fiscal_position_id.apply_tax_ids
 
     def action_register_payment_move_line(self):
-        dummy, act_id = self.env['ir.model.data'].get_object_reference(
-            'l10n_br_account', 'action_payment_account_move_line'
+        dummy, act_id = self.env["ir.model.data"].get_object_reference(
+            "l10n_br_account", "action_payment_account_move_line"
         )
-        receivable = (self.account_id.internal_type == 'receivable')
-        vals = self.env['ir.actions.act_window'].browse(act_id).read()[0]
-        vals['context'] = {
-            'default_amount': self.debit or self.credit,
-            'default_partner_type': 'customer' if receivable else 'supplier',
-            'default_partner_id': self.partner_id.id,
-            'default_communication': self.name,
-            'default_move_line_id': self.id,
+        receivable = self.account_id.internal_type == "receivable"
+        vals = self.env["ir.actions.act_window"].browse(act_id).read()[0]
+        vals["context"] = {
+            "default_amount": self.debit or self.credit,
+            "default_partner_type": "customer" if receivable else "supplier",
+            "default_partner_id": self.partner_id.id,
+            "default_communication": self.name,
+            "default_move_line_id": self.id,
         }
         return vals

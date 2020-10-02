@@ -67,9 +67,9 @@ class L10nBrWebsiteSale(main.WebsiteSale):
         return []
 
     def checkout_form_validate(self, mode, all_form_values, data):
-        errors, error_msg = super(
-            L10nBrWebsiteSale, self
-        ).checkout_form_validate(mode, all_form_values, data)
+        errors, error_msg = super(L10nBrWebsiteSale, self).checkout_form_validate(
+            mode, all_form_values, data
+        )
         cnpj_cpf = data.get("l10n_br_cnpj_cpf", "0")
         email = data.get("email", False)
 
@@ -107,9 +107,7 @@ class L10nBrWebsiteSale(main.WebsiteSale):
         ).values_postprocess(order, mode, values, errors, error_msg)
         new_values["l10n_br_cnpj_cpf"] = values.get("l10n_br_cnpj_cpf", None)
         new_values["company_type"] = values.get("company_type", None)
-        is_comp = (
-            False if values.get("company_type", None) == "person" else True
-        )
+        is_comp = False if values.get("company_type", None) == "person" else True
         new_values["is_company"] = is_comp
         if "city_id" in values and values["city_id"] != "":
             new_values["city_id"] = int(values.get("city_id", 0))
@@ -132,13 +130,7 @@ class L10nBrWebsiteSale(main.WebsiteSale):
                 # double check
                 order = request.website.sale_get_order()
                 shippings = Partner.sudo().search(
-                    [
-                        (
-                            "id",
-                            "child_of",
-                            order.partner_id.commercial_partner_id.ids,
-                        )
-                    ]
+                    [("id", "child_of", order.partner_id.commercial_partner_id.ids,)]
                 )
                 if (
                     partner_id not in shippings.mapped("id")
@@ -173,9 +165,7 @@ class L10nBrWebsiteSale(main.WebsiteSale):
     def search_zip_json(self, zip):
         if len(zip) >= 8:
             cep = re.sub("[^0-9]", "", zip)
-            vals = (
-                request.env["res.partner"].sudo().search_address_by_zip(cep)
-            )
+            vals = request.env["res.partner"].sudo().search_address_by_zip(cep)
 
             if vals:
                 return {
@@ -212,7 +202,4 @@ class BrWebsiteMyAccount(CustomerPortal):
     def account(self, redirect=None, **post):
         if "zip" in post:
             post["zipcode"] = post.pop("zip")
-        return super(BrWebsiteMyAccount, self).account(
-            redirect=redirect, **post
-        )
-
+        return super(BrWebsiteMyAccount, self).account(redirect=redirect, **post)

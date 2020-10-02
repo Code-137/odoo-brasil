@@ -270,4 +270,3 @@ class InutilizedNfe(models.Model):
                 "res_id": event.id,
             }
         )
-

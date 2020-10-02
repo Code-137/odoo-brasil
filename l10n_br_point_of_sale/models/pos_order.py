@@ -31,18 +31,12 @@ class PosOrder(models.Model):
         related="company_id.l10n_br_tipo_ambiente",
         readonly=True,
     )
-    sending_nfe = fields.Boolean(
-        string="Enviando NFe?", compute="_compute_nfe_number"
-    )
+    sending_nfe = fields.Boolean(string="Enviando NFe?", compute="_compute_nfe_number")
     nfe_exception = fields.Boolean(
         string="Problemas na NFe?", compute="_compute_nfe_number"
     )
-    nfe_status = fields.Char(
-        string="Mensagem NFe", compute="_compute_nfe_number"
-    )
-    nfe_number = fields.Integer(
-        string=u"Número NFe", compute="_compute_nfe_number"
-    )
+    nfe_status = fields.Char(string="Mensagem NFe", compute="_compute_nfe_number")
+    nfe_number = fields.Integer(string=u"Número NFe", compute="_compute_nfe_number")
     nfe_exception_number = fields.Integer(
         string=u"Número NFe", compute="_compute_nfe_number"
     )
@@ -56,22 +50,16 @@ class PosOrder(models.Model):
         return res
 
     def action_preview_danfe(self):
-        docs = self.env["eletronic.document"].search(
-            [("pos_order_id", "=", self.id)]
-        )
+        docs = self.env["eletronic.document"].search([("pos_order_id", "=", self.id)])
 
         if not docs:
             raise UserError("Não existe um E-Doc relacionado à este pedido")
 
         for doc in docs:
             if doc.state == "draft":
-                raise UserError(
-                    "Nota Fiscal de consumidor na fila de envio. Aguarde!"
-                )
+                raise UserError("Nota Fiscal de consumidor na fila de envio. Aguarde!")
 
-        action = self.env.ref("br_nfe.report_br_nfe_danfe").report_action(
-            docs
-        )
+        action = self.env.ref("br_nfe.report_br_nfe_danfe").report_action(docs)
         return action
 
     @api.model
@@ -80,9 +68,7 @@ class PosOrder(models.Model):
             "".join([str(SystemRandom().randrange(9)) for i in range(8)])
         )
 
-        res = super(PosOrder, self)._process_order(
-            pos_order, draft, existing_order
-        )
+        res = super(PosOrder, self)._process_order(pos_order, draft, existing_order)
 
         res = self.env["pos.order"].browse(res)
 
@@ -100,9 +86,7 @@ class PosOrder(models.Model):
 
             other_taxes = line.tax_ids.filtered(lambda x: not x.domain)
             tax_ids |= other_taxes
-            line.update(
-                {"tax_ids": [(6, None, [x.id for x in tax_ids if x])]}
-            )
+            line.update({"tax_ids": [(6, None, [x.id for x in tax_ids if x])]})
 
         foo = self._prepare_edoc_vals(res)
         eletronic = self.env["eletronic.document"].create(foo)
@@ -150,10 +134,7 @@ class PosOrder(models.Model):
             # - Simples Nacional -
             "icms_aliquota_credito": fiscal_pos.icms_aliquota_credito,
             "icms_valor_credito": round(
-                pos_line.price_subtotal
-                * fiscal_pos.icms_aliquota_credito
-                / 100,
-                2,
+                pos_line.price_subtotal * fiscal_pos.icms_aliquota_credito / 100, 2,
             ),
             # - II -
             # "ii_base_calculo": 0,
@@ -164,16 +145,12 @@ class PosOrder(models.Model):
             "ipi_cst": "99",
             "ipi_aliquota": ipi.amount or 0,
             "ipi_base_calculo": pos_line.price_subtotal or 0,
-            "ipi_valor": round(
-                (ipi.amount or 0) * pos_line.price_subtotal / 100, 2
-            ),
+            "ipi_valor": round((ipi.amount or 0) * pos_line.price_subtotal / 100, 2),
             # - PIS -
             "pis_cst": "49",
             "pis_aliquota": pis.amount or 0,
             "pis_base_calculo": pos_line.price_subtotal or 0,
-            "pis_valor": round(
-                (pis.amount or 0) * pos_line.price_subtotal / 100, 2
-            ),
+            "pis_valor": round((pis.amount or 0) * pos_line.price_subtotal / 100, 2),
             # - COFINS -
             "cofins_cst": "49",
             "cofins_aliquota": cofins.amount or 0,
@@ -213,20 +190,12 @@ class PosOrder(models.Model):
             "fiscal_position_id": pos.fiscal_position_id.id,
             "ind_final": pos.fiscal_position_id.ind_final,
             "ind_pres": pos.fiscal_position_id.ind_pres,
-            "metodo_pagamento": pos.payment_ids[
-                0
-            ].payment_method_id.metodo_pagamento,
+            "metodo_pagamento": pos.payment_ids[0].payment_method_id.metodo_pagamento,
             "troco": abs(
-                sum(
-                    payment.amount
-                    for payment in pos.payment_ids
-                    if payment.amount < 0
-                )
+                sum(payment.amount for payment in pos.payment_ids if payment.amount < 0)
             ),
             "valor_pago": sum(
-                payment.amount
-                for payment in pos.payment_ids
-                if payment.amount > 0
+                payment.amount for payment in pos.payment_ids if payment.amount > 0
             ),
         }
 
@@ -235,9 +204,7 @@ class PosOrder(models.Model):
         # base_pis = 0
         eletronic_items = []
         for pos_line in pos.lines:
-            eletronic_items.append(
-                (0, 0, self._prepare_edoc_item_vals(pos_line))
-            )
+            eletronic_items.append((0, 0, self._prepare_edoc_item_vals(pos_line)))
             # base_icms += pos_line.base_icms
             # base_pis += pos_line.base_pis
             # base_cofins += pos_line.base_cofins
@@ -270,9 +237,7 @@ class PosOrder(models.Model):
                 [("pos_order_id", "=", item.id)]
             )
 
-    total_edocs = fields.Integer(
-        string="Total NFe", compute=_compute_total_edocs
-    )
+    total_edocs = fields.Integer(string="Total NFe", compute=_compute_total_edocs)
 
     def action_view_edocs(self):
         if self.total_edocs == 1:
@@ -325,9 +290,7 @@ class PosOrderLine(models.Model):
     def get_approximate_taxes(self):
         ncm = self.product_id.l10n_br_ncm_id
 
-        tributos_estimados_federais = self.price_subtotal * (
-            ncm.federal_nacional / 100
-        )
+        tributos_estimados_federais = self.price_subtotal * (ncm.federal_nacional / 100)
         tributos_estimados_estaduais = self.price_subtotal * (
             ncm.estadual_imposto / 100
         )

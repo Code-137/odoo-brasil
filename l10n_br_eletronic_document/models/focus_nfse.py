@@ -41,7 +41,8 @@ def send_api(token, ambiente, edocs):
         return {
             "code": 400,
             "api_code": 500,
-            "message": "Erro ao tentar envio de NFe - Favor contactar suporte\n%s" % response.text,
+            "message": "Erro ao tentar envio de NFe - Favor contactar suporte\n%s"
+            % response.text,
         }
 
     response = response.json()

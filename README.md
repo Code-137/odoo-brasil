@@ -29,7 +29,7 @@ Para dúvidas acesse: [Documentação](http://www.odoo-next.com.br/my/documents/
 
 ## Introdução
 
-Este repositório adapta o Odoo 13 para ser usado no Brasil
+Este repositório adapta o Odoo 14 para ser usado no Brasil
 
 <p align="right"><a href="#top">:arrow_up:</a></p>
 

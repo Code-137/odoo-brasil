@@ -33,9 +33,7 @@ class PaymentAccountMoveLine(models.TransientModel):
     )
     communication = fields.Char(string="Anotações")
     payment_date = fields.Date(
-        string="Data do Pagamento",
-        default=fields.Date.context_today,
-        required=True,
+        string="Data do Pagamento", default=fields.Date.context_today, required=True,
     )
     currency_id = fields.Many2one(
         "res.currency",
@@ -54,9 +52,7 @@ class PaymentAccountMoveLine(models.TransientModel):
         move_line_id = rec.get("move_line_id", False)
         amount = 0
         if not move_line_id:
-            raise UserError(
-                _("Não foi selecionada nenhuma linha de cobrança.")
-            )
+            raise UserError(_("Não foi selecionada nenhuma linha de cobrança."))
         move_line = self.env["account.move.line"].browse(move_line_id)
         if move_line[0].amount_residual:
             amount = (
@@ -111,9 +107,7 @@ class PaymentAccountMoveLine(models.TransientModel):
             force_counterpart_account=self.move_line_id.account_id.id
         ).create(vals)
         pay.post()
-        move_line = self.env["account.move.line"].browse(
-            vals["move_line_ids"][0][2]
-        )
+        move_line = self.env["account.move.line"].browse(vals["move_line_ids"][0][2])
         lines_to_reconcile = (pay.move_line_ids + move_line).filtered(
             lambda l: l.account_id == move_line.account_id
         )
